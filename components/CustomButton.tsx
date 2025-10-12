@@ -5,7 +5,7 @@ import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 
 const CustomButton = ({
   onPress,
-  title = "Click Me",
+  title,
   style,
   textStyle,
   leftIcon,
