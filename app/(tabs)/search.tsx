@@ -8,7 +8,7 @@ import { Category, MenuItem } from "@/type";
 import cn from "clsx";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect } from "react";
-import { FlatList, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Search = () => {
@@ -17,11 +17,17 @@ const Search = () => {
     category: string;
   }>();
 
-  const { data, refetch, loading } = useAppwrite({
+  const {
+    data,
+    refetch,
+    loading: dataLoading,
+  } = useAppwrite({
     fn: getMenu,
     params: { category, query, limit: 6 },
   });
-  const { data: categories } = useAppwrite({ fn: getCategories });
+  const { data: categories, loading: categoriesLoading } = useAppwrite({
+    fn: getCategories,
+  });
 
   const categoryItems: Category[] =
     categories?.map((doc) => ({
@@ -78,7 +84,18 @@ const Search = () => {
             <Filter categories={categoryItems} />
           </View>
         )}
-        ListEmptyComponent={() => !loading && <Text>No results</Text>}
+        ListEmptyComponent={() => {
+          if (dataLoading || categoriesLoading) {
+            return (
+              <View className="flex-1 w-full items-center justify-center py-20">
+                <ActivityIndicator size="large" color="#F97316" />
+              </View>
+            );
+          } else
+            return (
+              <Text className="text-center text-gray-500">No results</Text>
+            );
+        }}
       />
     </SafeAreaView>
   );

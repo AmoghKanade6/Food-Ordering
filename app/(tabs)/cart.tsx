@@ -4,6 +4,7 @@ import CustomHeader from "@/components/CustomHeader";
 import { useCartStore } from "@/store/cart.store";
 import { PaymentInfoStripeProps } from "@/type";
 import cn from "clsx";
+import { useMemo } from "react";
 import { FlatList, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -24,9 +25,20 @@ const PaymentInfoStripe = ({
 );
 
 const Cart = () => {
-  const { items, getTotalItems, getTotalPrice } = useCartStore();
-  const totalItems = getTotalItems();
-  const totalPrice = getTotalPrice();
+  const items = useCartStore((state) => state.items);
+
+  const { totalItems, totalPrice } = useMemo(() => {
+    const ti = items.reduce((sum, it) => sum + (it.quantity ?? 0), 0);
+    const tp = items.reduce((sum, it) => {
+      const base = it.price ?? 0;
+      const customPrice = (it.customizations ?? []).reduce(
+        (s, c) => s + (c?.price ?? 0),
+        0
+      );
+      return sum + (it.quantity ?? 0) * (base + customPrice);
+    }, 0);
+    return { totalItems: ti, totalPrice: tp };
+  }, [items]);
 
   return (
     <SafeAreaView className="bg-white h-full">

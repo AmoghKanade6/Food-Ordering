@@ -18,27 +18,31 @@ export const useCartStore = create<CartStore>((set, get) => ({
 
   addItem: (item) => {
     const customizations = item.customizations ?? [];
-
-    const existing = get().items.find(
-      (i) =>
-        i.id === item.id &&
-        areCustomizationsEqual(i.customizations ?? [], customizations)
-    );
-
-    if (existing) {
-      set({
-        items: get().items.map((i) =>
+    set((prev) => {
+      const existing = prev.items.find(
+        (i) =>
           i.id === item.id &&
           areCustomizationsEqual(i.customizations ?? [], customizations)
-            ? { ...i, quantity: i.quantity + 1 }
-            : i
-        ),
-      });
-    } else {
-      set({
-        items: [...get().items, { ...item, quantity: 1, customizations }],
-      });
-    }
+      );
+
+      if (existing) {
+        return {
+          items: prev.items.map((i) =>
+            i.id === item.id &&
+            areCustomizationsEqual(i.customizations ?? [], customizations)
+              ? { ...i, quantity: i.quantity + (item.quantity ?? 1) }
+              : i
+          ),
+        };
+      }
+
+      return {
+        items: [
+          ...prev.items,
+          { ...item, quantity: item.quantity ?? 1, customizations },
+        ],
+      };
+    });
   },
 
   removeItem: (id, customizations = []) => {

@@ -4,7 +4,9 @@ import { CartItemType } from "@/type";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
 const CartItem = ({ item }: { item: CartItemType }) => {
-  const { increaseQty, decreaseQty, removeItem } = useCartStore();
+  const removeItem = useCartStore((state) => state.removeItem);
+  const increaseQty = useCartStore((state) => state.increaseQty);
+  const decreaseQty = useCartStore((state) => state.decreaseQty);
 
   return (
     <View
@@ -60,7 +62,7 @@ const CartItem = ({ item }: { item: CartItemType }) => {
         onPress={() => removeItem(item.id, item.customizations!)}
         className="flex-center"
       >
-        <Image source={images.trash} className="size-5" resizeMode="contain" />
+        <Image source={images.trash} className="size-6" resizeMode="contain" />
       </TouchableOpacity>
     </View>
   );

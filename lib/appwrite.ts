@@ -63,6 +63,7 @@ export const createUser = async ({
 export const signIn = async ({ email, password }: SignInParams) => {
   try {
     const session = await account.createEmailPasswordSession(email, password);
+    return session;
   } catch (e) {
     throw new Error(e as string);
   }
@@ -84,6 +85,16 @@ export const getCurrentUser = async () => {
     return currentUser.documents[0];
   } catch (e) {
     console.log(e);
+    throw new Error(e as string);
+  }
+};
+
+export const signOut = async () => {
+  try {
+    await account.deleteSession("current");
+    console.log("User signed out successfully");
+  } catch (e) {
+    console.error("Error signing out:", e);
     throw new Error(e as string);
   }
 };
@@ -117,5 +128,18 @@ export const getCategories = async () => {
     return categories.documents;
   } catch (e) {
     throw new Error(e as string);
+  }
+};
+
+export const getMenuById = async (id: string) => {
+  try {
+    const item = await databases.getDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.menuId,
+      id
+    );
+    return item;
+  } catch (e) {
+    throw new Error((e as any)?.message ?? String(e));
   }
 };
