@@ -38,6 +38,14 @@ export interface CartItemType {
   customizations?: CartCustomization[];
 }
 
+export interface Customization {
+  $id: string;
+  name: string;
+  price: number;
+  group: string;
+  choiceType: "single" | "multiple";
+}
+
 export interface CartStore {
   items: CartItemType[];
   addItem: (

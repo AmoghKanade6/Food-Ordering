@@ -1,4 +1,9 @@
-import { CreateUserPrams, GetMenuParams, SignInParams } from "@/type";
+import {
+  CreateUserPrams,
+  Customization,
+  GetMenuParams,
+  SignInParams,
+} from "@/type";
 import {
   Account,
   Avatars,
@@ -141,5 +146,49 @@ export const getMenuById = async (id: string) => {
     return item;
   } catch (e) {
     throw new Error((e as any)?.message ?? String(e));
+  }
+};
+
+export const getCustomizationsForMenu = async (
+  menuId: string
+): Promise<Customization[]> => {
+  try {
+    const rows = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.menuCustomizationsId,
+      [Query.equal("menu", menuId)]
+    );
+
+    const customizationIds = rows.documents
+      .map((row) => row.customizations)
+      .filter(Boolean) as string[];
+
+    if (!customizationIds.length) return [];
+
+    const docs = await Promise.all(
+      customizationIds.map(async (id) => {
+        try {
+          const c = await databases.getDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.customizationsId,
+            id
+          );
+          return {
+            $id: c.$id,
+            name: c.name,
+            price: Number(c.price ?? 0),
+            group: c.type ?? "default",
+            choiceType: "single",
+          };
+        } catch (e) {
+          console.log("customizationIds error", e);
+          return null;
+        }
+      })
+    );
+    return docs.filter(Boolean) as Customization[];
+  } catch (e) {
+    console.error("getCustomizationsForMenu error", e);
+    return [];
   }
 };

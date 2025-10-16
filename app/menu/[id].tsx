@@ -1,8 +1,9 @@
+// MenuDetails.tsx
 import CustomHeader from "@/components/CustomHeader";
+import MenuCustomizations from "@/components/CustomMenu";
 import { getMenuById } from "@/lib/appwrite";
 import { useCartStore } from "@/store/cart.store";
-import { MenuItem } from "@/type";
-import cn from "clsx";
+import { Customization, MenuItem } from "@/type";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
@@ -21,9 +22,14 @@ export default function MenuDetails() {
   const router = useRouter();
   const addItem = useCartStore((state) => state.addItem);
   const items = useCartStore((s) => s.items);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [doc, setDoc] = useState<any | null>(null);
+  const [selected, setSelected] = useState<{
+    map: Record<string, string[]>;
+    items: Customization[];
+    total: number;
+  }>({ map: {}, items: [], total: 0 });
 
   useEffect(() => {
     if (!id) return;
@@ -50,7 +56,6 @@ export default function MenuDetails() {
     };
   }, [id]);
 
-  // Map Appwrite document -> MenuItem
   const item: MenuItem | null = useMemo(() => {
     if (!doc) return null;
     return {
@@ -84,13 +89,19 @@ export default function MenuDetails() {
 
   const handleAddToCart = () => {
     if (!item) return;
+    const perItemTotal = item.price + selected.total;
 
     addItem({
       id: item.$id,
       name: item.name,
-      price: item.price,
+      price: perItemTotal,
       image_url: item.image_url,
-      customizations: [],
+      customizations: selected.items.map((c) => ({
+        id: c.$id,
+        name: c.name,
+        price: c.price ?? 0,
+        type: c.group ?? "default",
+      })),
       quantity: localQty,
     });
 
@@ -134,29 +145,25 @@ export default function MenuDetails() {
       </View>
 
       <ScrollView contentContainerStyle={{ paddingBottom: 140 }}>
+        {/* Item info */}
         <View className="px-6 mt-2" style={{ minHeight: 240 }}>
           <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
-            {/* Text Column */}
             <View style={{ flex: 2, marginRight: 16 }}>
               <Text className="text-2xl font-extrabold text-[#111827]">
                 {item.name}
               </Text>
               <Text className="text-sm text-gray-400 mt-1">{item.type}</Text>
-
-              {/* rating */}
               <View className="flex-row items-center align-center mt-3">
                 <Text className="text-orange-400 mr-2">★★★★★</Text>
                 <Text className="text-sm text-gray-500">
                   {item.rating?.toFixed(1) ?? "0"}/5
                 </Text>
               </View>
-
-              {/* price */}
               <Text className="text-2xl font-extrabold mt-3">
                 ${item.price.toFixed(2)}
               </Text>
 
-              {/* stats */}
+              {/* stats: Calories, Protein, Bun Type */}
               <View className="flex-column justify-start items-start gap-4 mt-4">
                 <View>
                   <Text className="text-xs text-gray-400">Calories</Text>
@@ -179,7 +186,6 @@ export default function MenuDetails() {
               </View>
             </View>
 
-            {/* Image */}
             <View style={{ flex: 1, alignItems: "flex-end" }}>
               <Image
                 source={{ uri: imageUri }}
@@ -190,79 +196,21 @@ export default function MenuDetails() {
           </View>
         </View>
 
-        <View className="px-6 mt-6">
-          <View className="flex-row items-center justify-between bg-[#FE8C000D] p-4 rounded-full">
-            {/* Left: Delivery */}
-            <View className="flex-row items-center gap-2">
-              <Text className="bg-white rounded-full px-2 py-1 text-sm">
-                💲
-              </Text>
-              <Text className="text-sm text-gray-700">Free Delivery</Text>
-            </View>
-
-            {/* Middle: Time */}
-            <View className="flex-row items-center">
-              <Text className="text-sm text-gray-700">20 - 30 mins</Text>
-            </View>
-
-            {/* Right: Rating */}
-            <View className="flex-row items-center">
-              <Text className="text-sm text-gray-700">⭐ {item.rating}</Text>
-            </View>
-          </View>
-        </View>
-
+        {/* Description */}
         <View className="px-6 mt-5">
           <Text className="text-gray-600 leading-7">{item.description}</Text>
         </View>
 
-        <View className="px-6 mt-6">
-          <Text className="text-base font-semibold mb-3">Toppings</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            className="pb-2"
-          >
-            {["Tomato", "Onions", "Cheese", "Bacon"].map((t) => (
-              <TouchableOpacity
-                key={t}
-                className={cn(
-                  "mr-3 bg-white rounded-2xl items-center justify-center p-3 shadow"
-                )}
-                style={{ width: 92 }}
-              >
-                <View className="w-14 h-14 rounded-lg bg-[#FE8C000D] items-center justify-center mb-2">
-                  <Text>🍅</Text>
-                </View>
-                <Text className="text-sm text-gray-700">{t}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-
-        <View className="px-6 mt-6">
-          <Text className="text-base font-semibold mb-3">Side options</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            className="pb-6"
-          >
-            {["Fries", "Coleslaw", "Salad", "Pringles"].map((s) => (
-              <TouchableOpacity
-                key={s}
-                className="mr-3 bg-white rounded-2xl items-center justify-center p-3 shadow"
-                style={{ width: 92 }}
-              >
-                <View className="w-14 h-14 rounded-lg bg-[#FE8C000D] items-center justify-center mb-2">
-                  <Text>🍟</Text>
-                </View>
-                <Text className="text-sm text-gray-700">{s}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+        {/* Customizations */}
+        <MenuCustomizations
+          menuId={item.$id}
+          onSelectionChange={(map, items, total) => {
+            setSelected({ map, items, total });
+          }}
+        />
       </ScrollView>
 
+      {/* Bottom bar */}
       <View style={styles.bottomBar}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
           <TouchableOpacity onPress={handleDecrease} style={styles.qtyBtn}>
@@ -276,7 +224,7 @@ export default function MenuDetails() {
 
         <TouchableOpacity onPress={handleAddToCart} style={styles.addBtn}>
           <Text className="text-white font-semibold">
-            Add to cart (${(item.price * localQty).toFixed(2)})
+            Add to cart ${((item.price + selected.total) * localQty).toFixed(2)}
           </Text>
         </TouchableOpacity>
       </View>

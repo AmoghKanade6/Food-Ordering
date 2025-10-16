@@ -25,8 +25,19 @@ const CartItem = ({ item }: { item: CartItemType }) => {
         <View>
           <Text className="base-bold text-dark-100">{item.name}</Text>
           <Text className="paragraph-bold text-primary mt-1">
-            ${item.price}
+            ${item.price.toFixed(2)}
           </Text>
+
+          {/* Show customizations */}
+          {item.customizations && item.customizations.length > 0 && (
+            <View className="mt-1">
+              {item.customizations.map((c) => (
+                <Text key={c.id} className="text-sm text-gray-700">
+                  + {c.name} (${c.price.toFixed(2)})
+                </Text>
+              ))}
+            </View>
+          )}
 
           <View className="flex flex-row items-center gap-x-4 mt-2">
             <TouchableOpacity

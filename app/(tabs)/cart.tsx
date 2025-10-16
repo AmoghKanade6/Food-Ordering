@@ -30,12 +30,8 @@ const Cart = () => {
   const { totalItems, totalPrice } = useMemo(() => {
     const ti = items.reduce((sum, it) => sum + (it.quantity ?? 0), 0);
     const tp = items.reduce((sum, it) => {
-      const base = it.price ?? 0;
-      const customPrice = (it.customizations ?? []).reduce(
-        (s, c) => s + (c?.price ?? 0),
-        0
-      );
-      return sum + (it.quantity ?? 0) * (base + customPrice);
+      const perItem = it.price ?? 0;
+      return sum + (it.quantity ?? 0) * perItem;
     }, 0);
     return { totalItems: ti, totalPrice: tp };
   }, [items]);
@@ -48,7 +44,9 @@ const Cart = () => {
         keyExtractor={(item) => item.id}
         contentContainerClassName="pb-28 px-5 pt-5"
         ListHeaderComponent={() => <CustomHeader title="Your Cart" />}
-        ListEmptyComponent={() => <Text>Cart Empty</Text>}
+        ListEmptyComponent={() => (
+          <Text className="text-center text-gray-500">Cart Empty</Text>
+        )}
         ListFooterComponent={() =>
           totalItems > 0 && (
             <View className="gap-5">
