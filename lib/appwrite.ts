@@ -192,3 +192,26 @@ export const getCustomizationsForMenu = async (
     return [];
   }
 };
+
+export const updateUser = async (
+  documentId: string,
+  payload: { name?: string; avatar?: string }
+) => {
+  try {
+    const data: Record<string, any> = {};
+    if (payload.name !== undefined) data.name = payload.name;
+    if (payload.avatar !== undefined) data.avatar = payload.avatar;
+
+    const updated = await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.userCollectionId,
+      documentId,
+      data
+    );
+
+    return updated;
+  } catch (e) {
+    console.error("updateUser error", e);
+    throw new Error((e as any)?.message ?? String(e));
+  }
+};
