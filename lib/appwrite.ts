@@ -3,6 +3,7 @@ import {
   Customization,
   GetMenuParams,
   SignInParams,
+  User,
 } from "@/type";
 import {
   Account,
@@ -10,6 +11,7 @@ import {
   Client,
   Databases,
   ID,
+  Models,
   Query,
   Storage,
   TablesDB,
@@ -41,56 +43,84 @@ export const storage = new Storage(client);
 export const tablesDB = new TablesDB(client);
 export const avatars = new Avatars(client);
 
+export const mapDocumentToUser = (doc: Models.Document): User => {
+  const raw: any = doc as any;
+  return {
+    $id: doc.$id,
+    $collectionId: doc.$collectionId ?? "",
+    $databaseId: doc.$databaseId ?? "",
+    $createdAt: doc.$createdAt ?? "",
+    $updatedAt: doc.$updatedAt ?? "",
+    $permissions: (doc as any).$permissions ?? [],
+    $sequence: (doc as any).$sequence ?? 0,
+    name: raw.name ?? "",
+    email: raw.email ?? "",
+    avatar: raw.avatar
+      ? String(raw.avatar)
+      : avatars.getInitialsURL(raw.name ?? "User").toString(),
+  } as User;
+};
+
 export const createUser = async ({
   email,
   password,
   name,
-}: CreateUserPrams) => {
+}: CreateUserPrams): Promise<User> => {
+  const newAccount = await account.create(ID.unique(), email, password, name);
   try {
-    const newAccount = await account.create(ID.unique(), email, password, name);
-    if (!newAccount) throw Error;
+    await (account as any).createEmailSession(email, password);
+  } catch {
+    await (account as any).createEmailPasswordSession?.(email, password);
+  }
 
-    await signIn({ email, password });
+  const avatarUrl = avatars.getInitialsURL(name).toString();
 
-    const avatarUrl = avatars.getInitialsURL(name);
+  const createdDoc = await databases.createDocument(
+    appwriteConfig.databaseId,
+    appwriteConfig.userCollectionId,
+    ID.unique(),
+    { email, name, accountId: newAccount.$id, avatar: avatarUrl }
+  );
 
-    return await databases.createDocument(
-      appwriteConfig.databaseId,
-      appwriteConfig.userCollectionId,
-      ID.unique(),
-      { email, name, accountId: newAccount.$id, avatar: avatarUrl }
-    );
-  } catch (error) {
-    throw new Error(error as string);
+  return mapDocumentToUser(createdDoc);
+};
+
+export const signIn = async ({
+  email,
+  password,
+}: SignInParams): Promise<User> => {
+  try {
+    try {
+      await (account as any).createEmailSession(email, password);
+    } catch {
+      await (account as any).createEmailPasswordSession?.(email, password);
+    }
+    // fetch and return the typed user
+    const u = await getCurrentUser();
+    if (!u) throw new Error("Failed to fetch user after sign in");
+    return u;
+  } catch (e: any) {
+    throw new Error(e?.message ?? String(e));
   }
 };
 
-export const signIn = async ({ email, password }: SignInParams) => {
-  try {
-    const session = await account.createEmailPasswordSession(email, password);
-    return session;
-  } catch (e) {
-    throw new Error(e as string);
-  }
-};
-
-export const getCurrentUser = async () => {
+export const getCurrentUser = async (): Promise<User | null> => {
   try {
     const currentAccount = await account.get();
-    if (!currentAccount) throw Error;
+    if (!currentAccount) return null;
 
-    const currentUser = await databases.listDocuments(
+    const res = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.userCollectionId,
       [Query.equal("accountId", currentAccount.$id)]
     );
 
-    if (!currentUser) throw Error;
-
-    return currentUser.documents[0];
-  } catch (e) {
-    console.log(e);
-    throw new Error(e as string);
+    const doc = res.documents?.[0];
+    if (!doc) return null;
+    return mapDocumentToUser(doc);
+  } catch (e: any) {
+    console.warn("getCurrentUser error", e?.message ?? e);
+    return null;
   }
 };
 
@@ -196,22 +226,12 @@ export const getCustomizationsForMenu = async (
 export const updateUser = async (
   documentId: string,
   payload: { name?: string; avatar?: string }
-) => {
-  try {
-    const data: Record<string, any> = {};
-    if (payload.name !== undefined) data.name = payload.name;
-    if (payload.avatar !== undefined) data.avatar = payload.avatar;
-
-    const updated = await databases.updateDocument(
-      appwriteConfig.databaseId,
-      appwriteConfig.userCollectionId,
-      documentId,
-      data
-    );
-
-    return updated;
-  } catch (e) {
-    console.error("updateUser error", e);
-    throw new Error((e as any)?.message ?? String(e));
-  }
+): Promise<User> => {
+  const updatedDoc = await databases.updateDocument(
+    appwriteConfig.databaseId,
+    appwriteConfig.userCollectionId,
+    documentId,
+    payload
+  );
+  return mapDocumentToUser(updatedDoc);
 };

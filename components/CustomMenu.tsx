@@ -51,18 +51,9 @@ export default function MenuCustomizations({
       try {
         const res = await getCustomizationsForMenu(menuId);
         if (!mounted) return;
-        console.log(
-          "[MenuCustomizations] loaded",
-          res.length,
-          "items for menuId",
-          menuId
-        );
         setCustomizations(res);
       } catch (err) {
-        console.error(
-          "[MenuCustomizations] Failed to load customizations:",
-          err
-        );
+        console.error("Failed to load customizations:", err);
         if (!mounted) return;
         setCustomizations([]);
       } finally {
@@ -75,7 +66,6 @@ export default function MenuCustomizations({
     };
   }, [menuId]);
 
-  // group items by `group` (fallback to "default")
   const grouped = useMemo(() => {
     const map: Record<string, Customization[]> = {};
     for (const c of customizations) {
@@ -83,7 +73,6 @@ export default function MenuCustomizations({
       if (!map[g]) map[g] = [];
       map[g].push(c);
     }
-    console.log("[MenuCustomizations] grouped keys:", Object.keys(map));
     return map;
   }, [customizations]);
 

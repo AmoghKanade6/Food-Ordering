@@ -10,11 +10,10 @@ import { Alert, Text, View } from "react-native";
 const SignIn = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({ email: "", password: "" });
-  const { setIsAuthenticated, fetchAuthenticatedUser } = useAuthStore();
+  const { setIsAuthenticated, setUser } = useAuthStore();
 
   const submit = async () => {
     const { email, password } = form;
-
     if (!email || !password)
       return Alert.alert(
         "Error",
@@ -22,12 +21,12 @@ const SignIn = () => {
       );
     setIsSubmitting(true);
     try {
-      await signIn({ email, password });
+      const user = await signIn({ email, password });
+      setUser(user);
       setIsAuthenticated(true);
-      await fetchAuthenticatedUser();
       router.replace("/");
     } catch (error: any) {
-      Alert.alert("Error", error.message);
+      Alert.alert("Error", error.message ?? "Sign in failed");
       Sentry.captureEvent(error);
     } finally {
       setIsSubmitting(false);

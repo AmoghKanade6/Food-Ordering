@@ -43,9 +43,8 @@ export default function MenuDetails() {
         if (!mounted) return;
         setDoc(res);
       } catch (e: any) {
-        console.error("[MenuDetails] getMenuById error:", e);
+        console.error("MenuDetails error:", e);
         if (!mounted) return;
-        setError(e?.message ?? "Failed to load item");
       } finally {
         if (mounted) setLoading(false);
       }

@@ -1,6 +1,7 @@
 import { images } from "@/constants";
 import useAuthStore from "@/store/auth.store";
 import { Redirect, Slot } from "expo-router";
+import { useEffect } from "react";
 import {
   Dimensions,
   Image,
@@ -12,7 +13,17 @@ import {
 } from "react-native";
 
 export default function AuthLayout() {
-  const { isAuthenticated } = useAuthStore();
+  const { fetchAuthenticatedUser, isAuthenticated } = useAuthStore();
+
+  useEffect(() => {
+    (async () => {
+      try {
+        await fetchAuthenticatedUser();
+      } catch (e: any) {
+        console.error("fetchAuthenticatedUser threw:", e);
+      }
+    })();
+  }, []);
 
   if (isAuthenticated) return <Redirect href="/" />;
 

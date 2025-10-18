@@ -4,6 +4,13 @@
     "appVersionSource": "remote"
   },
   "build": {
+    "release": {
+      "env": {
+        "SENTRY_AUTH_TOKEN": "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",
+        "SENTRY_ORG": "ak-1b",
+        "SENTRY_PROJECT": "food-ordering"
+      }
+    },
     "development": {
       "developmentClient": true,
       "distribution": "internal",
@@ -14,10 +21,20 @@
       }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "SENTRY_AUTH_TOKEN": "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",
+        "SENTRY_ORG": "ak-1b",
+        "SENTRY_PROJECT": "food-ordering"
+      }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "SENTRY_AUTH_TOKEN": "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",
+        "SENTRY_ORG": "ak-1b",
+        "SENTRY_PROJECT": "food-ordering"
+      }
     }
   },
   "submit": {

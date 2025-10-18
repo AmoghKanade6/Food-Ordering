@@ -4,17 +4,24 @@ import InfoRow from "@/components/InfoRow";
 import { images } from "@/constants";
 import { signOut, updateUser } from "@/lib/appwrite";
 import useAuthStore from "@/store/auth.store";
-import { User } from "@/type";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { Models } from "react-native-appwrite";
+import {
+  Image,
+  Modal,
+  Pressable,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Profile = () => {
   const { user, setIsAuthenticated, setUser } = useAuthStore();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [loadingSave, setLoadingSave] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -24,23 +31,12 @@ const Profile = () => {
       router.push("/sign-in");
     } catch (error) {
       console.error("Logout failed:", error);
+    } finally {
+      setShowLogoutConfirm(false);
     }
   };
 
   const handleOpenEdit = () => setIsEditOpen(true);
-
-  const mapDocumentToUser = (doc: Models.Document): User => ({
-    $id: doc.$id,
-    $collectionId: doc.$collectionId,
-    $databaseId: doc.$databaseId,
-    $createdAt: doc.$createdAt,
-    $updatedAt: doc.$updatedAt,
-    $permissions: doc.$permissions ?? [],
-    $sequence: doc.$sequence ?? 0,
-    name: (doc as any).name ?? "",
-    email: (doc as any).email ?? "",
-    avatar: (doc as any).avatar ?? "",
-  });
 
   const handleSaveProfile = async (payload: {
     name?: string;
@@ -50,8 +46,7 @@ const Profile = () => {
     setLoadingSave(true);
     try {
       const updatedDoc = await updateUser(user.$id, payload);
-      const updatedUser = mapDocumentToUser(updatedDoc);
-      setUser(updatedUser);
+      setUser(updatedDoc);
     } catch (e) {
       console.error("Failed to update user:", e);
     } finally {
@@ -113,7 +108,7 @@ const Profile = () => {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={handleLogout}
+          onPress={() => setShowLogoutConfirm(true)}
           activeOpacity={0.85}
           className="h-14 rounded-full justify-center items-center mb-6 border-2 border-red-400"
           style={{ backgroundColor: "transparent" }}
@@ -129,6 +124,40 @@ const Profile = () => {
           await handleSaveProfile(payload);
         }}
       />
+
+      {/* Logout confirmation modal (NativeWind classes) */}
+      <Modal
+        visible={showLogoutConfirm}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowLogoutConfirm(false)}
+      >
+        <View className="flex-1 bg-black/40 justify-center items-center p-5">
+          <View className="w-full rounded-lg bg-white p-5 items-center shadow-lg">
+            <Text className="text-lg font-semibold mb-2">Confirm logout</Text>
+            <Text className="text-sm text-gray-500  mb-4">
+              Are you sure you want to log out? You will need to sign in again
+              to continue!.
+            </Text>
+
+            <View className="flex-row w-full space-x-3 gap-4">
+              <Pressable
+                onPress={() => setShowLogoutConfirm(false)}
+                className="flex-1 py-3 rounded-lg border border-gray-200 items-center bg-white"
+              >
+                <Text className="text-gray-700 font-semibold">Cancel</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={handleLogout}
+                className="flex-1 py-3 rounded-lg items-center bg-red-500"
+              >
+                <Text className="text-white font-semibold">Logout</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
