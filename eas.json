@@ -22,6 +22,9 @@
     },
     "preview": {
       "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
       "env": {
         "SENTRY_AUTH_TOKEN": "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",
         "SENTRY_ORG": "ak-1b",
@@ -30,6 +33,9 @@
     },
     "production": {
       "autoIncrement": true,
+      "android": {
+        "buildType": "app-bundle"
+      },
       "env": {
         "SENTRY_AUTH_TOKEN": "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",
         "SENTRY_ORG": "ak-1b",

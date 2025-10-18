@@ -14,6 +14,10 @@ A mobile food ordering application built with **Expo**, **React Native**, and **
 
 ---
 
+## Download Android APK File from Releases
+
+---
+
 ## Tech Stack
 
 This app is built using the following technologies:
