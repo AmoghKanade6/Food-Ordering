@@ -36,11 +36,11 @@ export default function TabLayout() {
         tabBarShowLabel: false,
         tabBarStyle: {
           position: "absolute",
-          bottom: 40,
+          bottom: 70,
           marginHorizontal: 20,
           height: 70,
           borderRadius: 50,
-          backgroundColor: "rgba(255, 255, 255, 0.6)",
+          backgroundColor: "rgba(255, 255, 255)",
           borderWidth: 1,
           borderColor: "rgba(255, 255, 255, 0.3)",
           shadowColor: "#1a1a1a",
