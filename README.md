@@ -7,6 +7,7 @@ A mobile food ordering application built with **Expo**, **React Native**, and **
 ## Table of Contents
 
 - [Tech Stack](#tech-stack)
+- [AI Usage](#ai-usage)
 - [App Screenshots](#screenshots)
 - [Getting Started](#getting-started)
 - [Learn More](#learn-more)
@@ -15,8 +16,6 @@ A mobile food ordering application built with **Expo**, **React Native**, and **
 ---
 
 ## Download Android APK File from Releases
-
----
 
 ## Tech Stack
 
@@ -45,6 +44,41 @@ This app is built using the following technologies:
 
 - TailwindCSS with `prettier-plugin-tailwindcss`
 - ESLint & TypeScript
+
+---
+
+## 🤖 AI Usage
+
+This project incorporated **AI-assisted development** to enhance productivity and streamline implementation. The following details explain where and how AI was involved:
+
+### 🔧 Model / Tool Used
+
+- **ChatGPT** — utilized to scaffold logic, generate reusable code structures, and assist with documentation.
+
+### 🧩 AI-Generated Components
+
+The following parts of the project were developed or assisted by AI:
+
+- **`appwrite.js`** – Appwrite integration (authentication, client setup, helper functions)
+- **Zustand store code** – Cart store, user store, and persistence helpers
+- **UI components & layouts** – Header, cart item, product card, search page, profile screens
+- **Business logic & utilities** – Price calculations, quantity updates, and memoized selectors
+- **Documentation** – README content, developer notes, and setup instructions
+
+### ⚙️ Handling AI-Generated Code
+
+AI outputs served as **scaffolding and development accelerators**. Before using in production, ensure:
+
+- All generated code is **reviewed**, **tested**, and **verified** for correctness and security.
+- No sensitive data (API keys, credentials) is committed to the repository.
+- Use **environment variables** or secure storage for secrets.
+
+### 🗂️ Reproducibility & Transparency
+
+To maintain transparency and reproducibility:
+
+- Store AI prompts and generated snippets in a dedicated folder — for example: `/docs/ai-prompts/`
+- This helps reviewers and contributors understand what was requested and produced by AI.
 
 ---
 
