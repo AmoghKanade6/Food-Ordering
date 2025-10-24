@@ -9,10 +9,16 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "icon": "./assets/images/logo.png",
+      "backgroundColor": "#ffffff",
+      "supportsTablet": true,
+      "bundleIdentifier": "com.amoghkanade.foodordering",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
-      "icon": "./assets/images/icon.png",
+      "icon": "./assets/images/logo.png",
       "backgroundColor": "#ffffff",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
