@@ -15,8 +15,6 @@ A mobile food ordering application built with **Expo**, **React Native**, and **
 
 ---
 
-**Download Android APK File from Releases**
-
 ## Tech Stack
 
 This app is built using the following technologies:
@@ -105,4 +103,5 @@ To maintain transparency and reproducibility:
 ```bash
 git clone <repo-url>
 cd food-ordering
+npx expo start --clear
 ```

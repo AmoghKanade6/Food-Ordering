@@ -1,4 +1,5 @@
 import { images } from "@/constants";
+import { appwriteConfig, storage } from "@/lib/appwrite";
 import * as ImagePicker from "expo-image-picker";
 import React, { useEffect, useState } from "react";
 import {
@@ -11,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { ID } from "react-native-appwrite";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type Props = {
@@ -52,8 +54,23 @@ const EditModal: React.FC<Props> = ({ visible, onClose, user, onSave }) => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const payload: any = { name, avatar };
-      await onSave(payload);
+      let avatarUrl = avatar;
+      if (avatar && avatar.startsWith("file://")) {
+        const fileId = ID.unique();
+        const fileInfo = {
+          uri: avatar,
+          name: `avatar_${fileId}.jpg`,
+          type: "image/jpeg",
+          size: 0,
+        };
+        const fileDoc = await storage.createFile(
+          appwriteConfig.bucketId,
+          fileId,
+          fileInfo
+        );
+        avatarUrl = `${appwriteConfig.endpoint}/storage/buckets/${appwriteConfig.bucketId}/files/${fileDoc.$id}/view?project=${appwriteConfig.projectId}`;
+      }
+      await onSave({ name, avatar: avatarUrl });
       onClose();
     } catch (e) {
       console.error("Failed to update profile", e);
